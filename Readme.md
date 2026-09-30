@@ -7,7 +7,7 @@
 | **Instituição** | SENAI |
 | **Curso** | Técnico De Desenvolvimento de Sistemas |
 | **Unidade curricular** | SESI CE 356 |
-| **Atividade** | Teste de Caixa Branca – Sistema de Pedidos |
+| **Atividade** | Teste de Caixa Branca |
 | **Aluno** | Matheus Guilherme Teixeira Silva |
 | **Turma** | 3B |
 | **Professor** | Robson e Reenye |
@@ -17,10 +17,10 @@
 
 ## 1. Contextualização sobre Teste de Caixa Branca
 
-O teste de caixa branca analisa não apenas as entradas e saídas do sistema, mas também a estrutura interna e sua lógica de funcionamento. O objetivo é verificar as condições, as comparações e os diferentes caminhos de execução, garantindo que o programa apresente o comportamento esperado. Essa abordagem permite identificar algumas falhas que podem passar despercebidas durante o uso comum, principalmente em situações específicas, como valores exatamente nos limites das regras.
+O Teste de caixa branca analisa não apenas as entradas e saídas do sistema, mas também a estrutura interna e sua lógica de funcionamento. O objetivo é verificar as condições, as comparações e os diferentes caminhos de execução, garantindo que o programa apresente o comportamento esperado. Essa abordagem permite identificar algumas falhas que podem passar despercebidas durante o uso comum, principalmente em situações específicas, como valores exatamente nos limites das regras.
 
 
-### Como eu defini o comportamento esperado
+### Comportamento esperado
 
 | Regra | O que eu espero |
 |---|---|
@@ -38,7 +38,8 @@ O teste de caixa branca analisa não apenas as entradas e saídas do sistema, ma
 
 ## 2. Análise das Estruturas de Decisão
 
-O código só usa `if`. Não tem `switch`, operador ternário, nem laço de repetição e o único operador lógico é o `&&` do cupom SENAI20.
+O código só usa if, e o único operador lógico é o && do cupom SENAI20.
+
 
 | # | Onde | O que é avaliado | Caminhos |
 |---|---|---|---|
@@ -58,20 +59,20 @@ O código só usa `if`. Não tem `switch`, operador ternário, nem laço de repe
 
 ## 3. Fluxograma do Exemplo
 
-Este é o fluxo completo do sistema, do clique no botão até o resultado na tela.
+Este é o fluxograma completo do sistema, do clique no botão até o resultado na tela.
 
 ```mermaid
 flowchart TD
     A([Início: clique em Calcular]) --> B[/Produto, quantidade, cupom e frete/]
-    B --> C{qtd < 0?}
+    B --> C{Quantidade < 0?}
     C -- Sim --> C1[Exibe: Quantidade inválida] --> Z
-    C -- Não --> D{qtd >= estoque?}
+    C -- Não --> D{Quantidade >= estoque?}
     D -- Sim --> D1[Exibe: Indisponível em estoque] --> Z
-    D -- Não --> E[subtotal = preço × qtd]
-    E --> F[desconto = calcularDesconto]
-    F --> G[valorFrete = calcularFrete]
-    G --> H[total = subtotal − desconto + frete]
-    H --> I{qtd > 5?}
+    D -- Não --> E[Subtotal = preço × quantidade]
+    E --> F[Desconto = calcularDesconto]
+    F --> G[ValorFrete = calcularFrete]
+    G --> H[Total = subtotal − desconto + frete]
+    H --> I{Quantidade > 5?}
     I -- Sim --> I1[total −= subtotal × 5%] --> J
     I -- Não --> J{total > 3000?}
     J -- Sim --> J1[total ×= 0,95] --> K
@@ -87,16 +88,16 @@ flowchart TD
 
 ## 4. Casos de Teste
 
-Criei um caso de teste para cada erro que encontrei
+Criei um caso de teste para cada erro encontrado. Rodei todos em Node.js com a mesma lógica do script.js, antes e depois da correção.
 
 | Identificação | Entrada | Condição/Caminho | Resultado Esperado |
 |---|---|---|---|
-| CT01 | Mouse, qtd 0, sem cupom, frete normal | D6 falso, D7 falso, segue o cálculo | "Quantidade inválida" |
-| CT02 | Teclado, qtd 10 (igual ao estoque), sem cupom, retirada | D6 falso, D7 no limite | Pedido aceito, total R$ 1.425,00 |
-| CT03 | Mouse, qtd 5, sem cupom, retirada | D8 com qtd = 5 (limite) | Desconto R$ 20,00, total R$ 380,00 |
-| CT04 | Mouse, qtd 10, cupom SENAI10, retirada | D1 verdadeiro, D8 verdadeiro | Desconto exibido R$ 120,00, total R$ 680,00 |
-| CT05 | Notebook, qtd 1, sem cupom, retirada (total 3000) | D9 e D11 com total = 3000 | 5% extra, total R$ 2.850,00, "Pedido de alto valor." |
-| CT06 | Notebook, qtd 1, sem cupom, frete expresso (total 3060) | D9 verdadeiro, depois D11 | "Pedido de alto valor", total R$ 2.907,00 |
+| CT01 | Mouse, quantidade 0, sem cupom, frete normal | D6 falso, D7 falso, segue o cálculo | "Quantidade inválida" |
+| CT02 | Teclado, quantidade 10 (igual ao estoque), sem cupom, retirada | D6 falso, D7 no limite | Pedido aceito, total R$ 1.425,00 |
+| CT03 | Mouse, quantidade 5, sem cupom, retirada | D8 com quantidade = 5 (limite) | Desconto R$ 20,00, total R$ 380,00 |
+| CT04 | Mouse, quantidade 10, cupom SENAI10, retirada | D1 verdadeiro, D8 verdadeiro | Desconto exibido R$ 120,00, total R$ 680,00 |
+| CT05 | Notebook, quantidade 1, sem cupom, retirada (total 3000) | D9 e D11 com total = 3000 | 5% extra, total R$ 2.850,00, "Pedido de alto valor." |
+| CT06 | Notebook, quantidade 1, sem cupom, frete expresso (total 3060) | D9 verdadeiro, depois D11 | "Pedido de alto valor", total R$ 2.907,00 |
 
 ---
 
@@ -130,9 +131,6 @@ Executei os casos em Node.js com a mesma lógica do `script.js`, primeiro no có
 
 ## 6. Análise dos Resultados
 
-Encontrei seis erros de lógica. Abaixo explico cada um, mostrando o caminho que o programa percorreu
-
----
 
 ### ERRO 1
 
@@ -154,9 +152,9 @@ if (qtd < 0) {
 
 **Resultado esperado:** "Quantidade inválida"
 
-**Resultado obtido:** "Pedido calculado com sucesso", com subtotal R$ 0,00, frete R$ 30,00 e total R$ 30,00. Ou seja, o cliente pagaria frete por zero itens
+**Resultado obtido:** "Pedido calculado com sucesso", com subtotal R$ 0,00, frete R$ 30,00 e total R$ 30,00. Ou seja, o cliente pagaria o frete por nenhum item
 
-**Erro identificado:** o limite está errado. Com `< 0`, o próprio zero passa, e ele é justamente o primeiro valor inválido. Um campo vazio também vira 0 e um decimal também passa
+**Erro identificado:** o limite está errado. Com `< 0`, O zero passa, porém ele é o primeiro valor inválido. Um campo vazio também vira 0 e com isso, um decimal também passa.
 
 **Correção realizada:**
 ```js
@@ -184,6 +182,7 @@ flowchart TD
 ### ERRO 2
 
 **Nível:** Fácil
+
 **Técnica usada:** análise de valores-limite
 
 **Trecho do código:**
@@ -194,7 +193,7 @@ if (qtd >= estoque[produtoSelecionado]) {
 }
 ```
 
-**Comportamento esperado:** Se existem 10 teclados em estoque, dá para comprar os 10
+**Comportamento esperado:** Se existem 10 teclados em estoque, é possível comprar os 10
 
 **Dados do teste:** Teclado (estoque 10), quantidade 10, sem cupom, retirada
 
@@ -204,14 +203,14 @@ if (qtd >= estoque[produtoSelecionado]) {
 
 **Resultado obtido:** "Quantidade indisponível em estoque"
 
-**Erro identificado:** o `>=` bloqueia justamente o pedido que usa todo o estoque. O correto é `>`. Por causa disso, o notebook (estoque 5) nunca poderia ser comprado em 5 unidades.
+**Erro identificado:** o `>=` Bloqueia justamente o pedido que usa todo o estoque. O correto é `>`. Por causa disso, o notebook (estoque 5) nunca poderia ser comprado em 5 unidades.
 
 **Correção realizada:**
 ```js
 if (qtd > estoque[produtoSelecionado]) {
 ```
 
-**Resultado após a correção:** o pedido é aceito, com total R$ 1.425,00. Também testei quantidade 11, que continua retornando "Quantidade indisponível em estoque."
+**Resultado após a correção:** o pedido é aceito, com total R$ 1.425,00. Foi testado também a quantidade 11, que continua retornando "Quantidade indisponível em estoque."
 
 **Fluxograma:**
 
@@ -229,6 +228,7 @@ flowchart TD
 ### ERRO 3
 
 **Nível:** Médio
+
 **Técnica usada:** Valores-limite e cobertura de decisões
 
 **Trecho do código:**
@@ -238,17 +238,17 @@ if (qtd > 5) {
 }
 ```
 
-**Comportamento esperado:** o desconto de 5% vale a partir de 5 unidades 
+**Comportamento esperado:** Desconto de 5% vale a partir de 5 unidades 
 
-**Dados do teste:** mouse, quantidade 5, sem cupom, retirada
+**Dados do teste:** Mouse, quantidade 5, sem cupom, retirada
 
 **Caminho percorrido:** D6 é falso e D7 (`5 >= 20`) é falso. O subtotal é 400, o desconto é 0, o frete é 0 e o total é 400. Em D8, `5 > 5` é falso, então o desconto não é aplicado. D9, D10 e D11 dão falso e o resultado é "Sucesso"
 
-**Resultado esperado:** desconto de R$ 20,00 e total de R$ 380,00
+**Resultado esperado:** Desconto de R$ 20,00 e total de R$ 380,00
 
-**Resultado obtido:** total de R$ 400,00, sem desconto
+**Resultado obtido:** Total de R$ 400,00, sem desconto
 
-**Erro identificado:** o `>` deixa de fora exatamente a quantidade que abre a faixa de desconto. O certo é `>=`
+**Erro identificado:** O `>` deixa de fora exatamente a quantidade que abre a faixa de desconto. O certo é `>=`
 
 **Correção realizada:**
 ```js
@@ -262,6 +262,7 @@ if (qtd >= QTD_MINIMA_DESCONTO) {
 **Resultado após a correção:** Total = R$ 380,00. Com 4 unidades continua sem desconto, como deve ser
 
 **Fluxograma:**
+
 ```mermaid
 flowchart TD
     A[/qtd = 5, mouse, retirada/] --> B["subtotal = 400; desconto = 0; frete = 0"]
@@ -277,6 +278,7 @@ flowchart TD
 ### ERRO 4
 
 **Nível:** Médio
+
 **Técnica usada:** Rastreamento de variáveis
 
 **Trecho do código:**
@@ -293,7 +295,7 @@ resultado.innerHTML = `
 `;
 ```
 
-**Comportamento esperado:** O desconto mostrado na tela deve ser a soma de todos os descontos aplicados (cupom e quantidade), para que subtotal − desconto + frete dê o total
+**Comportamento esperado:** O desconto mostrado na tela deve ser a soma de todos os descontos aplicados (cupom e quantidade), para que o subtotal − desconto + frete, dê o valor total
 
 **Dados do teste:** Mouse, quantidade 10, cupom SENAI10, retirada
 
@@ -336,7 +338,8 @@ flowchart TD
 ### ERRO 5
 
 **Nível:** Difícil
-**Técnica usada:** Análise de condições e limites entre decisões que dependem uma da outra
+
+**Técnica usada:** Análise de condições e limites em decisões interligadas.
 
 **Trecho do código:**
 ```js
@@ -389,6 +392,7 @@ flowchart TD
 ### ERRO 6
 
 **Nível:** Difícil
+
 **Técnica usada:** Análise de caminhos e rastreamento de variáveis
 
 **Trecho do código:**
@@ -414,7 +418,7 @@ if (total <= 0) {
 
 **Resultado obtido:** "Pedido calculado com sucesso." com total de R$ 2.907,00
 
-**Erro identificado:** Ordem das operações. O desconto extra reduz `total` e, logo depois, a mesma variável é usada para classificar o pedido. Qualquer pedido entre R$ 3.000,00 e cerca de R$ 3.157,89 recebe o desconto, fica abaixo de 3000 e perde a classificação. Uma decisão altera o dado que a próxima decisão vai utilizar.
+**Erro identificado:** Ordem das operações. O desconto extra reduz `total` e, logo depois, a mesma variável é usada para classificar o pedido. Qualquer pedido entre R$ 3.000,00 e cerca de R$ 3.157,89 recebe o desconto, fica abaixo de 3000 e perde a classificação. Uma decisão altera os dados que a próxima decisão vai utilizar.
 
 **Correção realizada:** Decidir se o valor é alto antes de mexer no total e usar essa regra na mensagem
 ```js
@@ -454,7 +458,7 @@ flowchart TD
 | 1 | Fácil | Aceita quantidade 0 e cobra frete | Recusa 0, vazio e decimais |
 | 2 | Fácil | Bloqueia pedido igual ao estoque | Aceita até o estoque e bloqueia acima |
 | 3 | Médio | 5 unidades sem desconto | Desconto a partir de 5 unidades |
-| 4 | Médio | Desconto mostrado não fecha com o total | Desconto mostrado soma cupom e quantidade |
+| 4 | Médio | Desconto mostrado não concorda com o total | Desconto mostrado soma cupom e quantidade |
 | 5 | Difícil | `>` e `>=` divergem em 3000 | Mesmo limite nas duas decisões |
 | 6 | Difícil | Perde "alto valor" depois do desconto | Classificação decidida antes do desconto |
 
@@ -464,7 +468,7 @@ Os seis casos passam por D1, D6, D7, D8, D9, D10 (lado falso), D11 (os dois lado
 
 ### Código corrigido
 
-O arquivo completo está em [`scriptnovo.js`](./scriptnovo.js). Esta é a função `finalizarPedido` depois das correções:
+O arquivo completo está em [`scriptarrumado.js`](./scriptarrumado.js). Esta é a função `finalizarPedido` depois das correções:
 
 ```js
 const LIMITE_ALTO_VALOR = 3000;
@@ -522,8 +526,4 @@ function finalizarPedido() {
 
 ## 7. Conclusão
 
-Com essa atividade, é possivél ver que um código pode rodar sem nenhum erro na tela e mesmo assim estar errado. Os seis problemas que foram encontrados não travam o sistema: o programa sempre mostra um resultado que aparenta estar normal. O erro só aparece quando você observa cada passo a passo, o valor de cada variável e a decisão que o programa executou.
-
-Quatro dos erros foram de valor-limite (`<` no lugar de `<=`, `>=` no lugar de `>`, `>` no lugar de `>=`). Um foi de inconsistência entre o desconto mostrado e o aplicado. O último foi na ordem das operações, em que uma decisão muda o valor que a decisão seguinte usa. Esse último foi o mais difícil de perceber e o fluxograma ajudou bastante a visualizar o caminho.
-
-Todos os seis casos de teste falharam antes da correção e deram certo depois, então o comportamento passou a concordar com as regras que foram definidas.
+A atividade mostrou que um código pode rodar sem erros visíveis e ainda estar incorreto. As seis falhas existentes não travavam o sistema e só foram detectadas na análise, passo a passo. Quatro erros de valor-limite (`<`, `>`, `>=`), uma inconsistência no desconto e um erro na ordem das operações (identificado com o fluxograma). Com as correções, todos os seis testes passaram a ser aprovados conforme as regras.
