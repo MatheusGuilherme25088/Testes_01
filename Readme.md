@@ -92,10 +92,10 @@ Criei um caso de teste para cada erro encontrado. Rodei todos em Node.js com a m
 
 | Identificação | Entrada | Condição/Caminho | Resultado Esperado |
 |---|---|---|---|
-| CT01 | Mouse, quantidade 0, sem cupom, frete normal | D6 falso, D7 falso, segue o cálculo | "Quantidade inválida" |
+| CT01 | Mouse, quantidade 0, sem cupom, frete normal | D6 falso, D7 falso | "Quantidade inválida" |
 | CT02 | Teclado, quantidade 10 (igual ao estoque), sem cupom, retirada | D6 falso, D7 no limite | Pedido aceito, total R$ 1.425,00 |
 | CT03 | Mouse, quantidade 5, sem cupom, retirada | D8 com quantidade = 5 (limite) | Desconto R$ 20,00, total R$ 380,00 |
-| CT04 | Mouse, quantidade 10, cupom SENAI10, retirada | D1 verdadeiro, D8 verdadeiro | Desconto exibido R$ 120,00, total R$ 680,00 |
+| CT04 | Mouse, quantidade 10, cupom SENAI10, retirada | D1 verdadeiro, D8 verdadeiro | Desconto R$ 120,00, total R$ 680,00 |
 | CT05 | Notebook, quantidade 1, sem cupom, retirada (total 3000) | D9 e D11 com total = 3000 | 5% extra, total R$ 2.850,00, "Pedido de alto valor." |
 | CT06 | Notebook, quantidade 1, sem cupom, frete expresso (total 3060) | D9 verdadeiro, depois D11 | "Pedido de alto valor", total R$ 2.907,00 |
 
@@ -420,7 +420,7 @@ if (total <= 0) {
 
 **Erro identificado:** Ordem das operações. O desconto extra reduz `total` e, logo depois, a mesma variável é usada para classificar o pedido. Qualquer pedido entre R$ 3.000,00 e cerca de R$ 3.157,89 recebe o desconto, fica abaixo de 3000 e perde a classificação. Uma decisão altera os dados que a próxima decisão vai utilizar.
 
-**Correção realizada:** Decidir se o valor é alto antes de mexer no total e usar essa regra na mensagem
+**Correção realizada:** Decidir se o valor é alto, antes de mexer no total e usar essa regra na mensagem
 ```js
 const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
 const descontoAltoValor = altoValor ? totalParcial * 0.05 : 0;
@@ -455,8 +455,8 @@ flowchart TD
 
 | Erro | Nível | Antes | Depois |
 |---|---|---|---|
-| 1 | Fácil | Aceita quantidade 0 e cobra frete | Recusa 0, vazio e decimais |
-| 2 | Fácil | Bloqueia pedido igual ao estoque | Aceita até o estoque e bloqueia acima |
+| 1 | Fácil | Aceita a quantidade 0 e cobra frete | Recusa a quantidade 0, vazio e decimais |
+| 2 | Fácil | Bloqueia o pedido igual ao estoque | Aceita até o estoque e bloqueia acima |
 | 3 | Médio | 5 unidades sem desconto | Desconto a partir de 5 unidades |
 | 4 | Médio | Desconto mostrado não concorda com o total | Desconto mostrado soma cupom e quantidade |
 | 5 | Difícil | `>` e `>=` divergem em 3000 | Mesmo limite nas duas decisões |
