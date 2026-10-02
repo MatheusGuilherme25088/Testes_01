@@ -13,11 +13,11 @@
 
 ---
 
-## 1. Contextualização sobre Teste de Caixa Branca
+## Contextualização sobre Teste de Caixa Branca
 
-O teste de caixa branca analisa a **estrutura interna do código**: os `if`, os operadores, a ordem dos cálculos e os caminhos que o programa pode seguir. Em vez de olhar só a entrada e a saída, escolho entradas que obriguem o programa a passar por cada decisão. Assim é possível achar falhas que o uso comum não mostra, principalmente nos valores-limite.
+No teste de caixa branca, eu analisei o código por dentro, verificando os `if`, as comparações e os cálculos. Escolhi valores que façam o programa passar por diferentes situações, para conferir se tudo funciona corretamente e encontrar possíveis erros, principalmente nos valores-limite.
 
-O sistema analisado é uma loja com três produtos. O usuário escolhe produto, quantidade, cupom e frete, e o `script.js` calcula o valor final do pedido. O código tem seis erros de lógica colocados de propósito (2 fáceis, 2 médios e 2 difíceis).
+O sistema é uma loja com três produtos, na qual o usuário escolhe o produto, a quantidade, o cupom e o frete. O `script.js` faz os cálculos para chegar ao valor final do pedido. O código tem seis erros de lógica de propósito, sendo dois fáceis, dois médios e dois difíceis.
 
 ### Comportamento esperado
 
@@ -34,29 +34,87 @@ O sistema analisado é uma loja com três produtos. O usuário escolhe produto, 
 
 ---
 
-## 2. Análise das Estruturas de Decisão
+## Análise das Estruturas de Decisão
 
-O código usa só `if`. O único operador lógico é o `&&` do cupom SENAI20.
+### Validação da quantidade (D6)
 
-| # | Onde | Condição | Verdadeiro | Falso |
-|---|---|---|---|---|
-| D1 | `calcularDesconto` | `codigo === "SENAI10"` | desconto de 10% | vai para D2 |
-| D2 | `calcularDesconto` | `codigo === "SENAI20" && subtotal >= 1000` | desconto de 20% | sem desconto |
-| D3 | `calcularFrete` | `tipo === "retirada"` | frete 0 | vai para D4 |
-| D4 | `calcularFrete` | `tipo === "expresso"` | frete 60 | vai para D5 |
-| D5 | `calcularFrete` | `subtotal >= 500` | frete 0 | frete 30 |
-| D6 | `finalizarPedido` | `qtd < 0` | "Quantidade inválida" | vai para D7 |
-| D7 | `finalizarPedido` | `qtd >= estoque` | "Indisponível" | segue o cálculo |
-| D8 | `finalizarPedido` | `qtd > 5` | aplica 5% | não aplica |
-| D9 | `finalizarPedido` | `total > 3000` | aplica 5% extra | não aplica |
-| D10 | `finalizarPedido` | `total <= 0` | "Valor inválido" | vai para D11 |
-| D11 | `finalizarPedido` | `total >= 3000` | "Alto valor" | "Sucesso" |
+```js
+if (qtd < 0) {
+    resultado.innerHTML = "<p>Quantidade inválida.</p>";
+    return;
+}
+```
+Descrição: verifica se a quantidade é negativa e o caminho percorrido pelo programa: Sim → exibe erro e encerra. Não → vai para o estoque.
 
----
+### Verificação do estoque (D7)
 
-## 3. Fluxograma do Exemplo
+```js
+if (qtd >= estoque[produtoSelecionado]) {
+    resultado.innerHTML = "<p>Quantidade indisponível em estoque.</p>";
+    return;
+}
+```
+Descrição: compara a quantidade solicitada com o estoque e o caminho percorrido pelo programa: Sim → exibe "indisponível" e encerra. Não → calcula o subtotal.
 
-Legenda: `( )` início/fim, `[ ]` processo, `< >` decisão, `/ /` entrada/saída.
+### 2.3 Cupom SENAI10 (D1)
+
+```js
+if (codigo === "SENAI10") {
+    return subtotal * 0.10;
+}
+```
+Descrição: aplica desconto de 10% quando o cupom é `SENAI10` e o caminho percorrido pelo programa: Sim → 10% de desconto. Não → vai para o SENAI20.
+
+### 2.4 Cupom SENAI20 (D2)
+
+```js
+if (codigo === "SENAI20" && subtotal >= 1000) {
+    return subtotal * 0.20;
+}
+```
+Descrição: aplica 20% quando o cupom é `SENAI20` e o subtotal é pelo menos R$ 1.000 (única condição composta do código, com `&&`) e o caminho percorrido pelo programa: Sim → 20% de desconto. Não → sem desconto.
+
+### 2.5 Cálculo do frete (D3, D4 e D5)
+
+```js
+if (tipo === "retirada") return 0;
+if (tipo === "expresso") return 60;
+if (subtotal >= 500) return 0;
+return 30;
+```
+Descrição: define o valor do frete pela modalidade e o subtotal e o caminho percorrido pelo programa: retirada → R$ 0. Expresso → R$ 60. Normal com subtotal ≥ 500 → R$ 0. Normal com subtotal < 500 → R$ 30. 
+
+### 2.6 Desconto por quantidade (D8)
+
+```js
+if (qtd > 5) {
+    total = total - subtotal * 0.05;
+}
+```
+Descrição: aplica 5% quando a quantidade é maior que cinco e o caminho percorrido pelo programa: Sim → subtrai 5% do total. Não → o total não muda.
+
+### 2.7 Desconto para alto valor (D9)
+
+```js
+if (total > 3000) {
+    total = total * 0.95;
+}
+```
+Descrição: aplica 5% quando o total é superior a R$ 3.000 e o caminho percorrido pelo programa: Sim → total × 0,95. Não → o total não muda.
+
+### 2.8 Classificação (D10 e D11)
+
+```js
+if (total <= 0) {
+    mensagem = "Valor do pedido inválido.";
+} else if (total >= 3000) {
+    mensagem = "Pedido de alto valor.";
+}
+```
+Descrição: classifica pedidos inválidos e de alto valor, usando o `total` já alterado pelas decisões anteriores, e o caminho percorrido pelo programa: `total <= 0` → "inválido". `total >= 3000` → "alto valor". Senão → "sucesso".
+
+
+## Fluxograma do Exemplo
 
 ```
         ( INÍCIO )
@@ -112,71 +170,67 @@ Legenda: `( )` início/fim, `[ ]` processo, `< >` decisão, `/ /` entrada/saída
 
 ---
 
-## 4. Casos de Teste
+## Casos de Teste
 
-| Identificação | Entrada (produto, qtd, cupom, frete) | Condição / Caminho | Resultado esperado |
+| Identificação | Entrada | Condição/Caminho | Resultado Esperado |
 |---|---|---|---|
-| CT01 | Mouse, 0, sem cupom, normal | D6 no limite (qtd = 0) | "Quantidade inválida." |
-| CT02 | Teclado, 10, sem cupom, retirada | D7 no limite (qtd = estoque) | Aceito, total R$ 1.425,00 |
-| CT03 | Mouse, 5, sem cupom, retirada | D8 no limite (qtd = 5) | Desconto R$ 20,00, total R$ 380,00 |
-| CT04 | Mouse, 10, SENAI10, retirada | D1 verdadeiro e D8 verdadeiro | Desconto R$ 120,00, total R$ 680,00 |
-| CT05 | Notebook, 1, sem cupom, retirada | D9 e D11 com total = 3000 | Total R$ 2.850,00, "Pedido de alto valor." |
-| CT06 | Notebook, 1, sem cupom, expresso | D9 verdadeiro, depois D11 | Total R$ 2.907,00, "Pedido de alto valor." |
-| CT07 | Teclado, 10, SENAI20, retirada | D2 verdadeiro (subtotal 1500) | Desconto R$ 375,00, total R$ 1.125,00 |
-| CT08 | Mouse, 10, SENAI20, normal | D2 falso (subtotal 800) | Cupom ignorado, desconto R$ 40,00, total R$ 760,00 |
-| CT09 | Mouse, 3, sem cupom, normal | D5 falso (subtotal 240) | Frete R$ 30,00, total R$ 270,00 |
-| CT10 | Teclado, 4, sem cupom, normal | D5 verdadeiro (subtotal 600) | Frete R$ 0,00, total R$ 600,00 |
-
-CT01 a CT06 são os testes dos seis erros. CT07 a CT10 cobrem o cupom SENAI20 e as faixas de frete.
+| CT01 | Mouse / quantidade 0 / normal | Validação da quantidade (D6) | "Quantidade inválida." |
+| CT02 | Teclado / quantidade 10 / retirada | Limite do estoque (D7) | Pedido aceito, total R$ 1.425,00 |
+| CT03 | Mouse / quantidade 5 / retirada | Desconto por quantidade (D8) | Desconto R$ 20,00, total R$ 380,00 |
+| CT04 | Mouse / quantidade 10 / SENAI10 / retirada | Dois descontos (D1 e D8) | Desconto exibido R$ 120,00, total R$ 680,00 |
+| CT05 | Notebook / quantidade 1 / retirada | Total = R$ 3000 (D9 e D11) | Total R$ 2.850,00, "Pedido de alto valor." |
+| CT06 | Notebook / quantidade 1 / expresso | Total 3060, desconto antes da classificação (D9 e D11) | Total R$ 2.907,00, "Pedido de alto valor." |
 
 ---
 
-## 5. Resultados dos Testes
+## Resultados dos Testes
 
-Os testes foram testados no Node.js com a mesma lógica do `script.js`, primeiro no código original e depois no corrigido.
 
-| Teste | Resultado esperado | Obtido (original) | Situação | Obtido (corrigido) | Situação |
-|---|---|---|---|---|---|
-| CT01 | Quantidade inválida | "Sucesso", total R$ 30,00 | Falhou | "Quantidade inválida." | Passou |
-| CT02 | Aceito, total 1.425,00 | "Indisponível em estoque" | Falhou | Total 1.425,00 | Passou |
-| CT03 | Desconto 20,00, total 380,00 | Desconto 0,00, total 400,00 | Falhou | Desconto 20,00, total 380,00 | Passou |
-| CT04 | Desconto 120,00, total 680,00 | Desconto 80,00, total 680,00 | Falhou | Desconto 120,00, total 680,00 | Passou |
-| CT05 | Total 2.850,00, alto valor | Total 3.000,00, alto valor | Falhou | Total 2.850,00, alto valor | Passou |
-| CT06 | Total 2.907,00, alto valor | Total 2.907,00, "sucesso" | Falhou | Total 2.907,00, alto valor | Passou |
-| CT07 | Desconto 375,00, total 1.125,00 | "Indisponível em estoque" | Falhou | Desconto 375,00, total 1.125,00 | Passou |
-| CT08 | Desconto 40,00, total 760,00 | Desconto 0,00, total 760,00 | Falhou | Desconto 40,00, total 760,00 | Passou |
-| CT09 | Frete 30,00, total 270,00 | Frete 30,00, total 270,00 | Passou | Frete 30,00, total 270,00 | Passou |
-| CT10 | Frete 0,00, total 600,00 | Frete 0,00, total 600,00 | Passou | Frete 0,00, total 600,00 | Passou |
+### Antes da correção
+
+| Teste | Entrada | Resultado Esperado | Resultado Obtido | Situação |
+|---|---|---|---|---|
+| CT01 | Mouse / quantidade 0 / normal | "Quantidade inválida." | "Pedido calculado com sucesso.", subtotal R$ 0,00, frete R$ 30,00, total R$ 30,00 | Falhou |
+| CT02 | Teclado / quantidade 10 / retirada | Pedido aceito, total R$ 1.425,00 | "Quantidade indisponível em estoque." | Falhou |
+| CT03 | Mouse / quantidade 5 / retirada | Desconto R$ 20,00, total R$ 380,00 | Desconto R$ 0,00, total R$ 400,00 | Falhou |
+| CT04 | Mouse / quantidade 10 / SENAI10 / retirada | Desconto exibido R$ 120,00, total R$ 680,00 | Desconto exibido R$ 80,00, total R$ 680,00 | Falhou |
+| CT05 | Notebook / quantidade 1 / retirada | Total R$ 2.850,00, "Pedido de alto valor." | Total R$ 3.000,00, "Pedido de alto valor." | Falhou |
+| CT06 | Notebook / quantidade 1 / expresso | Total R$ 2.907,00, "Pedido de alto valor." | Total R$ 2.907,00, "Pedido calculado com sucesso." | Falhou |
+
+
+### Depois da correção
+
+| Teste | Entrada | Resultado Esperado | Resultado Obtido | Situação |
+|---|---|---|---|---|
+| CT01 | Mouse / quantidade 0 / normal | "Quantidade inválida." | "Quantidade inválida." | Passou |
+| CT02 | Teclado / quantidade 10 / retirada | Pedido aceito, total R$ 1.425,00 | Subtotal R$ 1.500,00, desconto R$ 75,00, frete R$ 0,00, total R$ 1.425,00 | Passou |
+| CT03 | Mouse / quantidade 5 / retirada | Desconto R$ 20,00, total R$ 380,00 | Subtotal R$ 400,00, desconto R$ 20,00, total R$ 380,00 | Passou |
+| CT04 | Mouse / quantidade 10 / SENAI10 / retirada | Desconto exibido R$ 120,00, total R$ 680,00 | Subtotal R$ 800,00, desconto R$ 120,00, total R$ 680,00 | Passou |
+| CT05 | Notebook / quantidade 1 / retirada | Total R$ 2.850,00, "Pedido de alto valor." | Desconto de alto valor R$ 150,00, total R$ 2.850,00, "Pedido de alto valor." | Passou |
+| CT06 | Notebook / quantidade 1 / expresso | Total R$ 2.907,00, "Pedido de alto valor." | Desconto de alto valor R$ 153,00, total R$ 2.907,00, "Pedido de alto valor." | Passou |
 
 ---
 
-## 6. Análise dos Resultados
+## Análise dos Resultados
 
 ### ERRO 1
 
-- Nível: Fácil (valores-limite)
-- Trecho do código:
+- **Nível**: Fácil (valores-limite)
+- **Trecho do código**:
   ```js
   if (qtd < 0) {
   ```
-- Comportamento esperado: Que só aceitasse inteiros que fossem maiores que zero. O zero, campo vazio e decimais devem ser recusados.
-
-- Dados utilizados no teste: Mouse, quantidade 0, sem cupom, frete normal.
-
-- Caminho percorrido: D6 falso (`0 < 0`), D7 falso (`0 >= 20`), D5 falso (`0 >= 500`), D8 falso, D9 falso, D10 falso, D11 falso.
-
-- Resultado esperado: "Quantidade inválida."
-
-- Resultado que foi obtido: "Pedido calculado com sucesso", subtotal R$ 0,00, frete R$ 30,00 e total R$ 30,00.
-
-- Erro identificado: o zero é o primeiro valor inválido, mas `0 < 0` é falso e ele passa. O campo vazio vira 0 e o decimal (2,5) também passa, porque o código não verifica se o número é inteiro. O cliente pagaria frete sem comprar nada.
-
-- Correção realizada:
+- **Comportamento esperado**: Que ele só aceitasse inteiros que fossem maiores que zero. O zero, campo vazio e decimais devem ser recusados.
+- **Dados utilizados no teste**: Mouse, quantidade 0, sem cupom, frete normal.
+- **Caminho percorrido**: D6 falso (`0 < 0`), D7 falso (`0 >= 20`), D5 falso (`0 >= 500`), D8 falso, D9 falso, D10 falso, D11 falso.
+- **Resultado esperado**: "Quantidade inválida."
+- **Resultado que foi obtido**: "Pedido calculado com sucesso", subtotal R$ 0,00, frete R$ 30,00 e total R$ 30,00.
+- **Erro identificado**: o zero é o primeiro valor inválido, mas `0 < 0` é falso e ele passa. O campo vazio vira 0 e o decimal (2,5) também passa, porque o código não verifica se o número é inteiro. 
+- **Correção realizada**:
   ```js
   if (!Number.isInteger(qtd) || qtd <= 0) {
   ```
-
-- Resultado após a correção: "Quantidade inválida." para 0, vazio e 2,5.
+- **Resultado após a correção**: "Quantidade inválida." para 0, vazio e 2,5.
 
 **Fluxograma:**
 
@@ -482,91 +536,8 @@ Os testes foram testados no Node.js com a mesma lógica do `script.js`, primeiro
 
 ---
 
-### Comparação entre o comportamento anterior e o posterior
+## Conclusão
 
-| Erro | Nível | Antes | Depois |
-|---|---|---|---|
-| 1 | Fácil | Aceita quantidade 0, vazia ou decimal e cobra frete | Recusa 0, vazio e decimais |
-| 2 | Fácil | Bloqueia o pedido igual ao estoque | Aceita até o estoque e bloqueia acima |
-| 3 | Médio | 5 unidades sem desconto | Desconto a partir de 5 unidades |
-| 4 | Médio | Desconto mostrado não fecha com o total | Desconto mostrado soma cupom e quantidade |
-| 5 | Difícil | `>` e `>=` divergem em 3000 | Mesmo limite nas duas decisões |
-| 6 | Difícil | Perde "alto valor" depois do desconto | Classificação feita antes do desconto |
-
-### Cobertura
-
-- Todas as decisões (D1 a D11) foram executadas pelos dois lados, exceto D10 verdadeiro (`total <= 0`). Depois da correção do Erro 1 ele não é alcançável pela interface, pois com quantidade ≥ 1 o subtotal é sempre positivo.
-- Valores-limite testados: 0 (Erro 1), 10 e 11 (Erro 2), 4 e 5 (Erro 3), 3000 e 3060 (Erros 5 e 6).
-- A condição composta do SENAI20 foi testada com subtotal acima e abaixo de R$ 1.000 (CT07 e CT08).
+A atividade mostrou que um código pode rodar sem erros visíveis e mesmo assim estar incorreto. As seis falhas não travavam o sistema e só foram detectadas na análise passo a passo das decisões e dos valores das variáveis. Os erros encontrados foram quatro de valor-limite (<, >= e >, além de um caso em que > e >= comparavam o mesmo valor), um de variável desatualizada, em que o desconto por quantidade não entrava na variável exibida, e um de ordem das operações, em que uma decisão alterava o dado usado pela seguinte. Esse último ficou claro com o fluxograma.
 
 ---
-
-## 7. Conclusão
-
-A atividade mostrou que um código pode rodar sem erros visíveis e mesmo assim calcular errado. Nenhuma das seis falhas travava o sistema, e elas só apareceram quando li cada decisão, testei os valores nos limites e acompanhei as variáveis passo a passo.
-
-Quatro erros eram de valor-limite (`<`, `>=`, `>` e `>` contra `>=`), um era de variável desatualizada (o desconto por quantidade que não entrava em `desconto`) e um era de ordem das operações (uma decisão alterando o dado que a seguinte lê). Os dois últimos são difíceis de achar só olhando entrada e saída, e os fluxogramas ajudaram a ver onde o caminho real saía do esperado.
-
-Depois das correções, os dez casos de teste passaram e o resultado correspondeu ao comportamento esperado. Isso mostra a importância do teste de caixa branca: ele permite escolher os testes a partir dos caminhos do código.
-
----
-
-## Anexo – Código corrigido
-
-O arquivo completo é o [`scriptarrumado.js`](./scriptarrumado.js). A função `finalizarPedido` depois das seis correções:
-
-```js
-const LIMITE_ALTO_VALOR = 3000;
-const QTD_MINIMA_DESCONTO = 5;
-
-function finalizarPedido() {
-  const produtoSelecionado = produto.value;
-  const qtd = Number(quantidade.value);
-  const codigo = cupom.value.trim().toUpperCase();
-
-  // ERRO 1
-  if (!Number.isInteger(qtd) || qtd <= 0) {
-    resultado.innerHTML = "<p>Quantidade inválida.</p>";
-    return;
-  }
-
-  // ERRO 2
-  if (qtd > estoque[produtoSelecionado]) {
-    resultado.innerHTML = "<p>Quantidade indisponível em estoque.</p>";
-    return;
-  }
-
-  const subtotal = precos[produtoSelecionado] * qtd;
-  let desconto = calcularDesconto(subtotal, codigo);
-
-  // ERRO 3 e ERRO 4
-  if (qtd >= QTD_MINIMA_DESCONTO) {
-    desconto += subtotal * 0.05;
-  }
-
-  const valorFrete = calcularFrete(frete.value, subtotal);
-  const totalParcial = subtotal - desconto + valorFrete;
-
-  // ERRO 5 e ERRO 6
-  const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
-  const descontoAltoValor = altoValor ? totalParcial * 0.05 : 0;
-  const total = totalParcial - descontoAltoValor;
-
-  let mensagem = "Pedido calculado com sucesso.";
-
-  if (total <= 0) {
-    mensagem = "Valor do pedido inválido.";
-  } else if (altoValor) {
-    mensagem = "Pedido de alto valor.";
-  }
-
-  resultado.innerHTML = `
-    <p>${mensagem}</p>
-    <p>Subtotal: R$ ${subtotal.toFixed(2)}</p>
-    <p>Desconto: R$ ${desconto.toFixed(2)}</p>
-    ${altoValor ? `<p>Desconto alto valor: R$ ${descontoAltoValor.toFixed(2)}</p>` : ""}
-    <p>Frete: R$ ${valorFrete.toFixed(2)}</p>
-    <p class="total">Total: R$ ${total.toFixed(2)}</p>
-  `;
-}
-```

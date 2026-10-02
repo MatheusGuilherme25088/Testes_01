@@ -53,11 +53,13 @@ function finalizarPedido() {
   const qtd = Number(quantidade.value);
   const codigo = cupom.value.trim().toUpperCase();
 
+  // ERRO 1: zero, vazio e decimais passam a ser recusados
   if (!Number.isInteger(qtd) || qtd <= 0) {
     resultado.innerHTML = "<p>Quantidade inválida.</p>";
     return;
   }
 
+  // ERRO 2: pode comprar até o estoque inteiro
   if (qtd > estoque[produtoSelecionado]) {
     resultado.innerHTML = "<p>Quantidade indisponível em estoque.</p>";
     return;
@@ -66,6 +68,8 @@ function finalizarPedido() {
   const subtotal = precos[produtoSelecionado] * qtd;
   let desconto = calcularDesconto(subtotal, codigo);
 
+  // ERRO 3: desconto a partir de 5 unidades
+  // ERRO 4: o desconto por quantidade entra na variável exibida
   if (qtd >= QTD_MINIMA_DESCONTO) {
     desconto += subtotal * 0.05;
   }
@@ -73,6 +77,7 @@ function finalizarPedido() {
   const valorFrete = calcularFrete(frete.value, subtotal);
   const totalParcial = subtotal - desconto + valorFrete;
 
+  // ERRO 5 e 6: uma única decisão, tomada antes de alterar o total
   const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
   const descontoAltoValor = altoValor ? totalParcial * 0.05 : 0;
   const total = totalParcial - descontoAltoValor;
