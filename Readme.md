@@ -56,7 +56,7 @@ if (qtd >= estoque[produtoSelecionado]) {
 ```
 Descrição: compara a quantidade solicitada com o estoque e o caminho percorrido pelo programa: Sim → exibe "indisponível" e encerra. Não → calcula o subtotal.
 
-### 2.3 Cupom SENAI10 (D1)
+### Cupom SENAI10 (D1)
 
 ```js
 if (codigo === "SENAI10") {
@@ -65,7 +65,7 @@ if (codigo === "SENAI10") {
 ```
 Descrição: aplica desconto de 10% quando o cupom é `SENAI10` e o caminho percorrido pelo programa: Sim → 10% de desconto. Não → vai para o SENAI20.
 
-### 2.4 Cupom SENAI20 (D2)
+### Cupom SENAI20 (D2)
 
 ```js
 if (codigo === "SENAI20" && subtotal >= 1000) {
@@ -74,7 +74,7 @@ if (codigo === "SENAI20" && subtotal >= 1000) {
 ```
 Descrição: aplica 20% quando o cupom é `SENAI20` e o subtotal é pelo menos R$ 1.000 (única condição composta do código, com `&&`) e o caminho percorrido pelo programa: Sim → 20% de desconto. Não → sem desconto.
 
-### 2.5 Cálculo do frete (D3, D4 e D5)
+### Cálculo do frete (D3, D4 e D5)
 
 ```js
 if (tipo === "retirada") return 0;
@@ -84,7 +84,7 @@ return 30;
 ```
 Descrição: define o valor do frete pela modalidade e o subtotal e o caminho percorrido pelo programa: retirada → R$ 0. Expresso → R$ 60. Normal com subtotal ≥ 500 → R$ 0. Normal com subtotal < 500 → R$ 30. 
 
-### 2.6 Desconto por quantidade (D8)
+### Desconto por quantidade (D8)
 
 ```js
 if (qtd > 5) {
@@ -93,7 +93,7 @@ if (qtd > 5) {
 ```
 Descrição: aplica 5% quando a quantidade é maior que cinco e o caminho percorrido pelo programa: Sim → subtrai 5% do total. Não → o total não muda.
 
-### 2.7 Desconto para alto valor (D9)
+### Desconto para alto valor (D9)
 
 ```js
 if (total > 3000) {
@@ -102,7 +102,7 @@ if (total > 3000) {
 ```
 Descrição: aplica 5% quando o total é superior a R$ 3.000 e o caminho percorrido pelo programa: Sim → total × 0,95. Não → o total não muda.
 
-### 2.8 Classificação (D10 e D11)
+### Classificação (D10 e D11)
 
 ```js
 if (total <= 0) {
@@ -539,5 +539,5 @@ Descrição: classifica pedidos inválidos e de alto valor, usando o `total` já
 ## Conclusão
 
 A atividade mostrou que um código pode rodar sem erros visíveis e mesmo assim estar incorreto. As seis falhas não travavam o sistema e só foram detectadas na análise passo a passo das decisões e dos valores das variáveis. Os erros encontrados foram quatro de valor-limite (<, >= e >, além de um caso em que > e >= comparavam o mesmo valor), um de variável desatualizada, em que o desconto por quantidade não entrava na variável exibida, e um de ordem das operações, em que uma decisão alterava o dado usado pela seguinte. Esse último ficou claro com o fluxograma.
-
+O teste de caixa branca foi importante porque permitiu escolher os testes a partir dos caminhos do código, e não por tentativa. Antes das correções, os seis casos de teste não apresentaram o resultado esperado. Depois das correções, os seis passaram e o comportamento correspondeu às regras definidas.
 ---
