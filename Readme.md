@@ -540,4 +540,4 @@ Descrição: classifica pedidos inválidos e de alto valor, usando o `total` já
 
 A atividade mostrou que um código pode rodar sem erros visíveis e mesmo assim estar incorreto. As seis falhas não travavam o sistema e só foram detectadas na análise passo a passo das decisões e dos valores das variáveis. Os erros encontrados foram quatro de valor-limite (<, >= e >, além de um caso em que > e >= comparavam o mesmo valor), um de variável desatualizada, em que o desconto por quantidade não entrava na variável exibida, e um de ordem das operações, em que uma decisão alterava o dado usado pela seguinte. Esse último ficou claro com o fluxograma.
 O teste de caixa branca foi importante porque permitiu escolher os testes a partir dos caminhos do código, e não por tentativa. Antes das correções, os seis casos de teste não apresentaram o resultado esperado. Depois das correções, os seis passaram e o comportamento correspondeu às regras definidas.
----
+
