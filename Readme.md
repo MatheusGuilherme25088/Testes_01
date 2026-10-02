@@ -1,474 +1,519 @@
 # Teste de Caixa Branca – Loja SENAI
 
-## 
-
 | | |
 |---|---|
 | **Instituição** | SENAI |
-| **Curso** | Técnico De Desenvolvimento de Sistemas |
+| **Curso** | Técnico em Desenvolvimento de Sistemas |
 | **Unidade curricular** | SESI CE 356 |
-| **Atividade** | Teste de Caixa Branca |
+| **Atividade** | Teste de Caixa Branca – Sistema de Pedidos |
 | **Aluno** | Matheus Guilherme Teixeira Silva |
 | **Turma** | 3B |
-| **Professor** | Robson e Reenye |
+| **Professores** | Robson e Reenye |
 | **Data** | 30/09/2026 |
 
 ---
 
 ## 1. Contextualização sobre Teste de Caixa Branca
 
-O Teste de caixa branca analisa não apenas as entradas e saídas do sistema, mas também a estrutura interna e sua lógica de funcionamento. O objetivo é verificar as condições, as comparações e os diferentes caminhos de execução, garantindo que o programa apresente o comportamento esperado. Essa abordagem permite identificar algumas falhas que podem passar despercebidas durante o uso comum, principalmente em situações específicas, como valores exatamente nos limites das regras.
+O teste de caixa branca analisa a **estrutura interna do código**: os `if`, os operadores, a ordem dos cálculos e os caminhos que o programa pode seguir. Em vez de olhar só a entrada e a saída, escolho entradas que obriguem o programa a passar por cada decisão. Assim é possível achar falhas que o uso comum não mostra, principalmente nos valores-limite.
 
+O sistema analisado é uma loja com três produtos. O usuário escolhe produto, quantidade, cupom e frete, e o `script.js` calcula o valor final do pedido. O código tem seis erros de lógica colocados de propósito (2 fáceis, 2 médios e 2 difíceis).
 
 ### Comportamento esperado
 
-| Regra | O que eu espero |
+| Regra | O que se espera |
 |---|---|
 | Quantidade | Número inteiro maior que zero |
-| Estoque | Posso pedir até a quantidade em estoque |
+| Estoque | Pode pedir até a quantidade em estoque (notebook 5, mouse 20, teclado 10) |
 | Cupom `SENAI10` | 10% sobre o subtotal |
-| Cupom `SENAI20` | 20% sobre o subtotal, só se o subtotal for de R$ 1.000 ou mais |
-| Desconto por quantidade | 5% sobre o subtotal a partir de 5 unidades  |
-| Frete | Retirada grátis; expresso R$ 60; normal R$ 30, ou grátis com subtotal a partir de R$ 500 |
-| Pedido de alto valor | Total a partir de R$ 3.000, que ganha 5% extra e a mensagem "Pedido de alto valor" |
-| Exibição | Subtotal − descontos + frete deve ser o valor total mostrado |
+| Cupom `SENAI20` | 20% sobre o subtotal, só se o subtotal for R$ 1.000 ou mais |
+| Desconto por quantidade | 5% sobre o subtotal a partir de 5 unidades |
+| Frete | Retirada grátis, expresso R$ 60, normal R$ 30 (grátis se subtotal ≥ R$ 500) |
+| Pedido de alto valor | Total a partir de R$ 3.000: ganha 5% extra e a mensagem "Pedido de alto valor." |
+| Exibição | Subtotal − descontos + frete deve ser igual ao total mostrado |
 
 ---
 
-
 ## 2. Análise das Estruturas de Decisão
 
-O código só usa if, e o único operador lógico é o && do cupom SENAI20.
+O código usa só `if`. O único operador lógico é o `&&` do cupom SENAI20.
 
-
-| # | Onde | O que é avaliado | Caminhos |
-|---|---|---|---|
-| D1 | `calcularDesconto` | `codigo === "SENAI10"` | Verdadeiro: 10% / Falso: vai para D2 |
-| D2 | `calcularDesconto` | `codigo === "SENAI20" && subtotal >= 1000` | Verdadeiro: 20% / Falso: sem desconto |
-| D3 | `calcularFrete` | `tipo === "retirada"` | Verdadeiro: R$ 0 / Falso: vai para D4 |
-| D4 | `calcularFrete` | `tipo === "expresso"` | Verdadeiro: R$ 60 / Falso: vai para D5 |
-| D5 | `calcularFrete` | `subtotal >= 500` | Verdadeiro: R$ 0 / Falso: R$ 30 |
-| D6 | `finalizarPedido` | `qtd < 0` | Verdadeiro: "Quantidade inválida" / Falso: vai para D7 |
-| D7 | `finalizarPedido` | `qtd >= estoque[produto]` | Verdadeiro: "Indisponível" / Falso: segue o cálculo |
-| D8 | `finalizarPedido` | `qtd > 5` | Verdadeiro: aplica 5% / Falso: não aplica |
-| D9 | `finalizarPedido` | `total > 3000` | Verdadeiro: aplica 5% extra / Falso: não aplica |
-| D10 | `finalizarPedido` | `total <= 0` | Verdadeiro: "Valor inválido" / Falso: vai para D11 |
-| D11 | `finalizarPedido` | `total >= 3000` | Verdadeiro: "Alto valor" / Falso: "Sucesso" |
+| # | Onde | Condição | Verdadeiro | Falso |
+|---|---|---|---|---|
+| D1 | `calcularDesconto` | `codigo === "SENAI10"` | desconto de 10% | vai para D2 |
+| D2 | `calcularDesconto` | `codigo === "SENAI20" && subtotal >= 1000` | desconto de 20% | sem desconto |
+| D3 | `calcularFrete` | `tipo === "retirada"` | frete 0 | vai para D4 |
+| D4 | `calcularFrete` | `tipo === "expresso"` | frete 60 | vai para D5 |
+| D5 | `calcularFrete` | `subtotal >= 500` | frete 0 | frete 30 |
+| D6 | `finalizarPedido` | `qtd < 0` | "Quantidade inválida" | vai para D7 |
+| D7 | `finalizarPedido` | `qtd >= estoque` | "Indisponível" | segue o cálculo |
+| D8 | `finalizarPedido` | `qtd > 5` | aplica 5% | não aplica |
+| D9 | `finalizarPedido` | `total > 3000` | aplica 5% extra | não aplica |
+| D10 | `finalizarPedido` | `total <= 0` | "Valor inválido" | vai para D11 |
+| D11 | `finalizarPedido` | `total >= 3000` | "Alto valor" | "Sucesso" |
 
 ---
 
 ## 3. Fluxograma do Exemplo
 
-Este é o fluxograma completo do sistema, do clique no botão até o resultado na tela.
+Legenda: `( )` início/fim, `[ ]` processo, `< >` decisão, `/ /` entrada/saída.
 
-```mermaid
-flowchart TD
-    A([Início: clique em Calcular]) --> B[/Produto, quantidade, cupom e frete/]
-    B --> C{Quantidade < 0?}
-    C -- Sim --> C1[Exibe: Quantidade inválida] --> Z
-    C -- Não --> D{Quantidade >= estoque?}
-    D -- Sim --> D1[Exibe: Indisponível em estoque] --> Z
-    D -- Não --> E[Subtotal = preço × quantidade]
-    E --> F[Desconto = calcularDesconto]
-    F --> G[ValorFrete = calcularFrete]
-    G --> H[Total = subtotal − desconto + frete]
-    H --> I{Quantidade > 5?}
-    I -- Sim --> I1[total −= subtotal × 5%] --> J
-    I -- Não --> J{total > 3000?}
-    J -- Sim --> J1[total ×= 0,95] --> K
-    J -- Não --> K{total <= 0?}
-    K -- Sim --> K1[mensagem = Valor inválido] --> M
-    K -- Não --> L{total >= 3000?}
-    L -- Sim --> L1[mensagem = Alto valor] --> M
-    L -- Não --> L2[mensagem = Sucesso] --> M
-    M[/Exibe mensagem, subtotal, desconto, frete e total/] --> Z([Fim])
+```
+        ( INÍCIO )
+            |
+            v
+ /produto, qtd, cupom, frete/
+            |
+            v
+    < qtd < 0 ? > --Sim--> /Quantidade inválida/ --> ( FIM )
+            |Não
+            v
+ < qtd >= estoque ? > --Sim--> /Indisponível/ --> ( FIM )
+            |Não
+            v
+ [subtotal = preço x qtd]
+            |
+            v
+ [desconto do cupom]
+            |
+            v
+ [calcula o frete]
+            |
+            v
+ [total = subtotal - desconto + frete]
+            |
+            v
+    < qtd > 5 ? > --Sim--> [total -= 5% do subtotal]
+            |Não                      |
+            +<-----------------------+
+            |
+            v
+  < total > 3000 ? > --Sim--> [total x 0,95]
+            |Não                      |
+            +<-----------------------+
+            |
+            v
+  < total <= 0 ? > --Sim--> [msg = Valor inválido]
+            |Não                      |
+            v                          |
+ < total >= 3000 ? > --Sim--> [msg = Alto valor]
+            |Não                      |
+            v                          |
+    [msg = Sucesso]                    |
+            |                          |
+            +<-------------------------+
+            |
+            v
+ /mensagem, subtotal, desconto, frete, total/
+            |
+            v
+        ( FIM )
 ```
 
 ---
 
 ## 4. Casos de Teste
 
-Criei um caso de teste para cada erro encontrado. Rodei todos em Node.js com a mesma lógica do script.js, antes e depois da correção.
-
-| Identificação | Entrada | Condição/Caminho | Resultado Esperado |
+| Identificação | Entrada (produto, qtd, cupom, frete) | Condição / Caminho | Resultado esperado |
 |---|---|---|---|
-| CT01 | Mouse, quantidade 0, sem cupom, frete normal | D6 falso, D7 falso | "Quantidade inválida" |
-| CT02 | Teclado, quantidade 10 (igual ao estoque), sem cupom, retirada | D6 falso, D7 no limite | Pedido aceito, total R$ 1.425,00 |
-| CT03 | Mouse, quantidade 5, sem cupom, retirada | D8 com quantidade = 5 (limite) | Desconto R$ 20,00, total R$ 380,00 |
-| CT04 | Mouse, quantidade 10, cupom SENAI10, retirada | D1 verdadeiro, D8 verdadeiro | Desconto R$ 120,00, total R$ 680,00 |
-| CT05 | Notebook, quantidade 1, sem cupom, retirada (total 3000) | D9 e D11 com total = 3000 | 5% extra, total R$ 2.850,00, "Pedido de alto valor." |
-| CT06 | Notebook, quantidade 1, sem cupom, frete expresso (total 3060) | D9 verdadeiro, depois D11 | "Pedido de alto valor", total R$ 2.907,00 |
+| CT01 | Mouse, 0, sem cupom, normal | D6 no limite (qtd = 0) | "Quantidade inválida." |
+| CT02 | Teclado, 10, sem cupom, retirada | D7 no limite (qtd = estoque) | Aceito, total R$ 1.425,00 |
+| CT03 | Mouse, 5, sem cupom, retirada | D8 no limite (qtd = 5) | Desconto R$ 20,00, total R$ 380,00 |
+| CT04 | Mouse, 10, SENAI10, retirada | D1 verdadeiro e D8 verdadeiro | Desconto R$ 120,00, total R$ 680,00 |
+| CT05 | Notebook, 1, sem cupom, retirada | D9 e D11 com total = 3000 | Total R$ 2.850,00, "Pedido de alto valor." |
+| CT06 | Notebook, 1, sem cupom, expresso | D9 verdadeiro, depois D11 | Total R$ 2.907,00, "Pedido de alto valor." |
+| CT07 | Teclado, 10, SENAI20, retirada | D2 verdadeiro (subtotal 1500) | Desconto R$ 375,00, total R$ 1.125,00 |
+| CT08 | Mouse, 10, SENAI20, normal | D2 falso (subtotal 800) | Cupom ignorado, desconto R$ 40,00, total R$ 760,00 |
+| CT09 | Mouse, 3, sem cupom, normal | D5 falso (subtotal 240) | Frete R$ 30,00, total R$ 270,00 |
+| CT10 | Teclado, 4, sem cupom, normal | D5 verdadeiro (subtotal 600) | Frete R$ 0,00, total R$ 600,00 |
+
+CT01 a CT06 são os testes dos seis erros. CT07 a CT10 cobrem o cupom SENAI20 e as faixas de frete.
 
 ---
 
 ## 5. Resultados dos Testes
 
-Executei os casos em Node.js com a mesma lógica do `script.js`, primeiro no código original e depois no código corrigido
+Os testes foram testados no Node.js com a mesma lógica do `script.js`, primeiro no código original e depois no corrigido.
 
-### Antes da correção
-
-| Teste | Entrada | Resultado Esperado | Resultado Obtido | Situação |
-|---|---|---|---|---|
-| CT01 | Mouse, 0, sem cupom, normal | Quantidade inválida | "Pedido calculado com sucesso", total R$ 30,00 | Falhou |
-| CT02 | Teclado, 10, sem cupom, retirada | Aceito, total R$ 1.425,00 | "Quantidade indisponível em estoque" | Falhou |
-| CT03 | Mouse, 5, sem cupom, retirada | Total R$ 380,00 | Total R$ 400,00, sem desconto | Falhou |
-| CT04 | Mouse, 10, SENAI10, retirada | Desconto R$ 120,00, total R$ 680,00 | Desconto R$ 80,00, total R$ 680,00 | Falhou |
-| CT05 | Notebook, 1, sem cupom, retirada | Total R$ 2.850,00 e alto valor | Total R$ 3.000,00 e "alto valor" | Falhou |
-| CT06 | Notebook, 1, sem cupom, expresso | Alto valor, total R$ 2.907,00 | "Pedido calculado com sucesso", total R$ 2.907,00 | Falhou |
-
-### Depois da correção
-
-| Teste | Resultado Obtido | Situação |
-|---|---|---|
-| CT01 | "Quantidade inválida." | Passou |
-| CT02 | Subtotal 1500,00, desconto 75,00, frete 0, total 1425,00 | Passou |
-| CT03 | Subtotal 400,00, desconto 20,00, total 380,00 | Passou |
-| CT04 | Subtotal 800,00, desconto 120,00, total 680,00 | Passou |
-| CT05 | Desconto de alto valor 150,00, total 2850,00, "Pedido de alto valor." | Passou |
-| CT06 | Desconto de alto valor 153,00, total 2907,00, "Pedido de alto valor." | Passou |
+| Teste | Resultado esperado | Obtido (original) | Situação | Obtido (corrigido) | Situação |
+|---|---|---|---|---|---|
+| CT01 | Quantidade inválida | "Sucesso", total R$ 30,00 | Falhou | "Quantidade inválida." | Passou |
+| CT02 | Aceito, total 1.425,00 | "Indisponível em estoque" | Falhou | Total 1.425,00 | Passou |
+| CT03 | Desconto 20,00, total 380,00 | Desconto 0,00, total 400,00 | Falhou | Desconto 20,00, total 380,00 | Passou |
+| CT04 | Desconto 120,00, total 680,00 | Desconto 80,00, total 680,00 | Falhou | Desconto 120,00, total 680,00 | Passou |
+| CT05 | Total 2.850,00, alto valor | Total 3.000,00, alto valor | Falhou | Total 2.850,00, alto valor | Passou |
+| CT06 | Total 2.907,00, alto valor | Total 2.907,00, "sucesso" | Falhou | Total 2.907,00, alto valor | Passou |
+| CT07 | Desconto 375,00, total 1.125,00 | "Indisponível em estoque" | Falhou | Desconto 375,00, total 1.125,00 | Passou |
+| CT08 | Desconto 40,00, total 760,00 | Desconto 0,00, total 760,00 | Falhou | Desconto 40,00, total 760,00 | Passou |
+| CT09 | Frete 30,00, total 270,00 | Frete 30,00, total 270,00 | Passou | Frete 30,00, total 270,00 | Passou |
+| CT10 | Frete 0,00, total 600,00 | Frete 0,00, total 600,00 | Passou | Frete 0,00, total 600,00 | Passou |
 
 ---
 
 ## 6. Análise dos Resultados
 
-
 ### ERRO 1
 
-**Nível:** Fácil (Valores limites)
+- Nível: Fácil (valores-limite)
+- Trecho do código:
+  ```js
+  if (qtd < 0) {
+  ```
+- Comportamento esperado: Que só aceitasse inteiros que fossem maiores que zero. O zero, campo vazio e decimais devem ser recusados.
 
-**Trecho do código:**
-```js
-if (qtd < 0) {
-  resultado.innerHTML = "<p>Quantidade inválida.</p>";
-  return;
-}
-```
+- Dados utilizados no teste: Mouse, quantidade 0, sem cupom, frete normal.
 
-**Comportamento esperado:** Quantidade zero, campo vazio ou número decimal (como 2,5) deveriam ser recusados
+- Caminho percorrido: D6 falso (`0 < 0`), D7 falso (`0 >= 20`), D5 falso (`0 >= 500`), D8 falso, D9 falso, D10 falso, D11 falso.
 
-**Dados do teste:** Mouse, quantidade 0, sem cupom, frete normal
+- Resultado esperado: "Quantidade inválida."
 
-**Caminho percorrido:** `Number("0")` = 0. Em D6, `0 < 0` é falso, então o programa não barra. Em D7, `0 >= 20` é falso. O subtotal fica 0, o desconto fica em 0, e em D5 `0 >= 500` é falso, então o frete é 30. O total vira 30, e D8, D9, D10 e D11 e dão falso, chegando em "Sucesso"
+- Resultado que foi obtido: "Pedido calculado com sucesso", subtotal R$ 0,00, frete R$ 30,00 e total R$ 30,00.
 
-**Resultado esperado:** "Quantidade inválida"
+- Erro identificado: o zero é o primeiro valor inválido, mas `0 < 0` é falso e ele passa. O campo vazio vira 0 e o decimal (2,5) também passa, porque o código não verifica se o número é inteiro. O cliente pagaria frete sem comprar nada.
 
-**Resultado obtido:** "Pedido calculado com sucesso", com subtotal R$ 0,00, frete R$ 30,00 e total R$ 30,00. Ou seja, o cliente pagaria o frete por nenhum item
+- Correção realizada:
+  ```js
+  if (!Number.isInteger(qtd) || qtd <= 0) {
+  ```
 
-**Erro identificado:** o limite está errado. Com `< 0`, O zero passa, porém ele é o primeiro valor inválido. Um campo vazio também vira 0 e com isso, um decimal também passa.
-
-**Correção realizada:**
-```js
-if (!Number.isInteger(qtd) || qtd <= 0) {
-```
-
-**Resultado após a correção:** "Quantidade inválida"
+- Resultado após a correção: "Quantidade inválida." para 0, vazio e 2,5.
 
 **Fluxograma:**
-```mermaid
-flowchart TD
-    A[/qtd = 0, produto = mouse, frete = normal/] --> B{"qtd < 0? (0 < 0)"}
-    B -- "Falso (erro: deveria barrar)" --> C{"qtd >= estoque? (0 >= 20)"}
-    C -- Falso --> D["subtotal = 80 × 0 = 0"]
-    D --> E["desconto = 0"]
-    E --> F{"subtotal >= 500?"}
-    F -- Falso --> G["frete = 30"]
-    G --> H["total = 0 − 0 + 30 = 30"]
-    H --> I["Exibe: Sucesso, total R$ 30,00"]
-    B -. "Caminho esperado" .-> X["Exibe: Quantidade inválida"]
+
+```
+ ( INÍCIO )
+     |
+     v
+ /Mouse, qtd = 0, normal/
+     |
+     v
+ < qtd < 0 ? >
+   0 < 0 = FALSO   <-- ERRO: o zero deveria ser barrado
+     |
+     v
+ [subtotal = 0, frete = 30]
+ [total = 0 - 0 + 30 = 30]
+     |
+     v
+ /Sucesso, total R$ 30,00/
+     |
+     v
+ ( FIM )
 ```
 
 ---
 
 ### ERRO 2
 
-**Nível:** Fácil
-
-**Técnica usada:** análise de valores-limite
-
-**Trecho do código:**
-```js
-if (qtd >= estoque[produtoSelecionado]) {
-  resultado.innerHTML = "<p>Quantidade indisponível em estoque.</p>";
-  return;
-}
-```
-
-**Comportamento esperado:** Se existem 10 teclados em estoque, é possível comprar os 10
-
-**Dados do teste:** Teclado (estoque 10), quantidade 10, sem cupom, retirada
-
-**Caminho percorrido:** D6 (`10 < 0`) é falso. Em D7, `10 >= 10` é verdadeiro, então o programa mostra "indisponível" e encerra com `return`, sem calcular nada
-
-**Resultado esperado:** Pedido aceito, com subtotal 1500,00, desconto 75,00 e total 1425,00
-
-**Resultado obtido:** "Quantidade indisponível em estoque"
-
-**Erro identificado:** o `>=` Bloqueia justamente o pedido que usa todo o estoque. O correto é `>`. Por causa disso, o notebook (estoque 5) nunca poderia ser comprado em 5 unidades.
-
-**Correção realizada:**
-```js
-if (qtd > estoque[produtoSelecionado]) {
-```
-
-**Resultado após a correção:** o pedido é aceito, com total R$ 1.425,00. Foi testado também a quantidade 11, que continua retornando "Quantidade indisponível em estoque."
+- **Nível:** Fácil (valores-limite)
+- **Trecho do código:**
+  ```js
+  if (qtd >= estoque[produtoSelecionado]) {
+  ```
+- **Comportamento esperado:** se existem 10 teclados em estoque, é possível comprar os 10.
+- **Dados utilizados no teste:** Teclado (estoque 10), quantidade 10, sem cupom, retirada.
+- **Caminho percorrido:** D6 falso (`10 < 0`), D7 verdadeiro (`10 >= 10`), o programa mostra a mensagem e encerra com `return`, sem calcular nada.
+- **Resultado esperado:** pedido aceito, subtotal 1.500,00, desconto 75,00 e total 1.425,00.
+- **Resultado obtido:** "Quantidade indisponível em estoque."
+- **Erro identificado:** o `>=` bloqueia justamente o pedido que usa todo o estoque. O correto é `>`. Com isso, o notebook (estoque 5) nunca poderia ser comprado em 5 unidades.
+- **Correção realizada:**
+  ```js
+  if (qtd > estoque[produtoSelecionado]) {
+  ```
+- **Resultado após a correção:** quantidade 10 é aceita (total R$ 1.425,00) e quantidade 11 continua bloqueada.
 
 **Fluxograma:**
 
-```mermaid
-flowchart TD
-    A[/qtd = 10, produto = teclado, estoque = 10/] --> B{"qtd < 0?"}
-    B -- Falso --> C{"qtd >= estoque? (10 >= 10)"}
-    C -- "Verdadeiro (erro: deveria ser falso)" --> D["Exibe: Indisponível em estoque"]
-    D --> E([return: encerra sem calcular])
-    C -. "Caminho esperado" .-> F["subtotal = 1500 → ... → total = 1425"]
+```
+ ( INÍCIO )
+     |
+     v
+ /Teclado, qtd = 10, retirada/
+     |
+     v
+ < qtd >= estoque ? >
+   10 >= 10 = VERDADEIRO   <-- ERRO: no limite deveria ser FALSO
+     |
+     v
+ /Quantidade indisponível em estoque/
+     |
+     v
+ [return: nada é calculado]
+     |
+     v
+ ( FIM )
 ```
 
 ---
 
 ### ERRO 3
 
-**Nível:** Médio
+- **Nível:** Médio (valores-limite e cobertura de decisões)
+- **Trecho do código:**
+  ```js
+  if (qtd > 5) {
+    total = total - subtotal * 0.05;
+  }
+  ```
+- **Comportamento esperado:** o desconto de 5% vale a partir de 5 unidades.
+- **Dados utilizados no teste:** Mouse, quantidade 5, sem cupom, retirada.
+- **Caminho percorrido:** D6 falso, D7 falso (`5 >= 20`), subtotal 400, desconto 0, frete 0, total 400. D8 falso (`5 > 5`), então o desconto não é aplicado. D9, D10 e D11 falsos, resultado "Sucesso".
+- **Resultado esperado:** desconto de R$ 20,00 e total de R$ 380,00.
+- **Resultado obtido:** total de R$ 400,00, sem desconto.
+- **Erro identificado:** o `>` deixa de fora exatamente a quantidade que abre a faixa de desconto. O certo é `>=`.
+- **Correção realizada:**
+  ```js
+  const QTD_MINIMA_DESCONTO = 5;
 
-**Técnica usada:** Valores-limite e cobertura de decisões
-
-**Trecho do código:**
-```js
-if (qtd > 5) {
-  total = total - subtotal * 0.05;
-}
-```
-
-**Comportamento esperado:** Desconto de 5% vale a partir de 5 unidades 
-
-**Dados do teste:** Mouse, quantidade 5, sem cupom, retirada
-
-**Caminho percorrido:** D6 é falso e D7 (`5 >= 20`) é falso. O subtotal é 400, o desconto é 0, o frete é 0 e o total é 400. Em D8, `5 > 5` é falso, então o desconto não é aplicado. D9, D10 e D11 dão falso e o resultado é "Sucesso"
-
-**Resultado esperado:** Desconto de R$ 20,00 e total de R$ 380,00
-
-**Resultado obtido:** Total de R$ 400,00, sem desconto
-
-**Erro identificado:** O `>` deixa de fora exatamente a quantidade que abre a faixa de desconto. O certo é `>=`
-
-**Correção realizada:**
-```js
-const QTD_MINIMA_DESCONTO = 5;
-
-if (qtd >= QTD_MINIMA_DESCONTO) {
-  desconto += subtotal * 0.05;
-}
-```
-
-**Resultado após a correção:** Total = R$ 380,00. Com 4 unidades continua sem desconto, como deve ser
+  if (qtd >= QTD_MINIMA_DESCONTO) {
+    desconto += subtotal * 0.05;
+  }
+  ```
+- **Resultado após a correção:** 5 unidades, total R$ 380,00. Com 4 unidades continua sem desconto.
 
 **Fluxograma:**
 
-```mermaid
-flowchart TD
-    A[/qtd = 5, mouse, retirada/] --> B["subtotal = 400; desconto = 0; frete = 0"]
-    B --> C["total = 400"]
-    C --> D{"qtd > 5? (5 > 5)"}
-    D -- "Falso (erro: deveria aplicar)" --> E{"total > 3000?"}
-    E -- Falso --> F["Exibe: total R$ 400,00"]
-    D -. "Caminho esperado" .-> G["total = 400 − 20 = 380"]
+```
+ ( INÍCIO )
+     |
+     v
+ /Mouse, qtd = 5, retirada/
+     |
+     v
+ [subtotal = 400, frete = 0]
+ [total = 400]
+     |
+     v
+ < qtd > 5 ? >
+   5 > 5 = FALSO   <-- ERRO: 5 unidades deveria ter desconto
+     |
+     v
+ /Sucesso, total R$ 400,00 (sem desconto)/
+     |
+     v
+ ( FIM )
 ```
 
 ---
 
 ### ERRO 4
 
-**Nível:** Médio
+- **Nível:** Médio (rastreamento de variáveis)
+- **Trecho do código:**
+  ```js
+  const desconto = calcularDesconto(subtotal, codigo);
+  let total = subtotal - desconto + valorFrete;
 
-**Técnica usada:** Rastreamento de variáveis
+  if (qtd > 5) {
+    total = total - subtotal * 0.05;
+  }
+  ```
+- **Comportamento esperado:** o desconto mostrado na tela deve somar todos os descontos (cupom e quantidade), para que subtotal − desconto + frete dê o total exibido.
+- **Dados utilizados no teste:** Mouse, quantidade 10, cupom SENAI10, retirada.
+- **Caminho percorrido:** subtotal 800. D1 verdadeiro, `desconto` = 80. Frete 0, total = 800 − 80 = 720. D8 verdadeiro (`10 > 5`), total = 720 − 40 = 680. A variável `desconto` continua valendo 80.
+- **Resultado esperado:** desconto de R$ 120,00 (80 + 40) e total de R$ 680,00.
+- **Resultado obtido:** subtotal 800,00, desconto 80,00, frete 0,00 e total 680,00.
+- **Erro identificado:** o desconto por quantidade altera só o `total` e nunca entra na variável `desconto`. A variável exibida e a usada no cálculo ficam diferentes, e a conta na tela não fecha (800 − 80 + 0 = 720, mas o total é 680).
+- **Correção realizada:**
+  ```js
+  let desconto = calcularDesconto(subtotal, codigo);
 
-**Trecho do código:**
-```js
-const desconto = calcularDesconto(subtotal, codigo);
-let total = subtotal - desconto + valorFrete;
+  if (qtd >= QTD_MINIMA_DESCONTO) {
+    desconto += subtotal * 0.05;
+  }
 
-if (qtd > 5) {
-  total = total - subtotal * 0.05;
-}
-
-resultado.innerHTML = `
-  <p>Desconto: R$ ${desconto.toFixed(2)}</p>
-`;
-```
-
-**Comportamento esperado:** O desconto mostrado na tela deve ser a soma de todos os descontos aplicados (cupom e quantidade), para que o subtotal − desconto + frete, dê o valor total
-
-**Dados do teste:** Mouse, quantidade 10, cupom SENAI10, retirada
-
-**Caminho percorrido:** O subtotal é 800. Em D1 o cupom vale, `desconto` = 80. O frete é 0 e o total é 800 − 80 = 720. Em D8, `10 > 5` é verdadeiro e o total vira 720 − 40 = 680. Só que a variável `desconto` continua valendo 8
-
-**Resultado esperado:** Desconto de R$ 120,00 (80 + 40) e total de R$ 680,00
-
-**Resultado obtido:** Subtotal 800,00, desconto 80,00, frete 0,00 e total 680,00.
-
-**Erro identificado:** O desconto por quantidade modifica bastante em `total` e nunca entra na variável `desconto`. A variável que aparece na tela e a que entrou no cálculo ficam diferentes e um desconto do cliente fica escondido.
-
-**Correção realizada:**
-```js
-let desconto = calcularDesconto(subtotal, codigo);
-
-if (qtd >= QTD_MINIMA_DESCONTO) {
-  desconto += subtotal * 0.05;
-}
-
-const totalParcial = subtotal - desconto + valorFrete;
-```
-
-**Resultado após a correção:** desconto de R$ 120,00 e total de R$ 680,00.
+  const totalParcial = subtotal - desconto + valorFrete;
+  ```
+- **Resultado após a correção:** desconto de R$ 120,00 e total de R$ 680,00. A conta fecha.
 
 **Fluxograma:**
-```mermaid
-flowchart TD
-    A[/mouse, qtd = 10, cupom = SENAI10, retirada/] --> B["subtotal = 800"]
-    B --> C["desconto = 80 (cupom)"]
-    C --> D["frete = 0"]
-    D --> E["total = 800 − 80 + 0 = 720"]
-    E --> F{"qtd > 5?"}
-    F -- Sim --> G["total = 720 − 40 = 680<br/>(desconto continua 80)"]
-    G --> H["Exibe: Desconto 80 / Total 680 (não fecha a conta)"]
-    F -. "Correção" .-> I["desconto = 80 + 40 = 120"]
+
+```
+ ( INÍCIO )
+     |
+     v
+ /Mouse, qtd = 10, SENAI10, retirada/
+     |
+     v
+ [subtotal = 800]
+ [desconto = 80]
+ [total = 800 - 80 + 0 = 720]
+     |
+     v
+ < qtd > 5 ? >
+   10 > 5 = VERDADEIRO
+     |
+     v
+ [total = 720 - 40 = 680]
+ [desconto continua 80]   <-- ERRO: os 40 não entraram em "desconto"
+     |
+     v
+ /Desconto 80, Total 680 (a conta não fecha)/
+     |
+     v
+ ( FIM )
 ```
 
 ---
 
 ### ERRO 5
 
-**Nível:** Difícil
+- **Nível:** Difícil (condições e limites em decisões que comparam o mesmo valor)
+- **Trecho do código:**
+  ```js
+  if (total > 3000) {
+    total = total * 0.95;
+  }
 
-**Técnica usada:** Análise de condições e limites em decisões interligadas.
+  ...
 
-**Trecho do código:**
-```js
-if (total > 3000) {
-  total = total * 0.95;
-}
+  } else if (total >= 3000) {
+    mensagem = "Pedido de alto valor.";
+  }
+  ```
+- **Comportamento esperado:** o mesmo limite deve valer para o desconto extra e para a mensagem de alto valor (a partir de R$ 3.000).
+- **Dados utilizados no teste:** Notebook, quantidade 1, sem cupom, retirada. O total fica em 3000.
+- **Caminho percorrido:** subtotal 3000, desconto 0, frete 0, total 3000. D8 falso. D9 falso (`3000 > 3000`), então não há desconto extra. D10 falso. D11 verdadeiro (`3000 >= 3000`), mensagem "Alto valor".
+- **Resultado esperado:** "Pedido de alto valor." com 5% extra, total de R$ 2.850,00.
+- **Resultado obtido:** "Pedido de alto valor." com total de R$ 3.000,00.
+- **Erro identificado:** duas decisões testam o mesmo limite com operadores diferentes (`>` em D9 e `>=` em D11). Com o total em 3000, o pedido é chamado de alto valor, mas não recebe o benefício. O erro só aparece nesse valor exato.
+- **Correção realizada:**
+  ```js
+  const LIMITE_ALTO_VALOR = 3000;
 
-if (total <= 0) {
-  mensagem = "Valor do pedido inválido.";
-} else if (total >= 3000) {
-  mensagem = "Pedido de alto valor.";
-}
-```
-
-**Comportamento esperado:** O mesmo limite deve valer para o desconto extra e para a mensagem de alto valor. Utilizei "a partir de R$ 3.000"
-
-**Dados do teste:** Notebook, quantidade 1, sem cupom, retirada. O total fica em 3000
-
-**Caminho percorrido:** O subtotal é 3000, o desconto é 0 e o frete é 0, então o total é 3000. D8 é falso. Em D9, `3000 > 3000` é falso, então não há desconto extra. D10 é falso. Em D11, `3000 >= 3000` é verdadeiro e a mensagem é "Alto valor"
-
-**Resultado esperado:** "Pedido de alto valor." com o 5% extra, total de R$ 2.850,00
-
-**Resultado obtido:** "Pedido de alto valor." com total de R$ 3.000,00
-
-**Erro identificado:** Duas decisões testam o mesmo limite com operadores diferentes (`>` e `>=`). Com o total em 3000, o pedido é chamado de alto valor, mas não ganha o benefício. O erro só aparece exatamente nesse valor, por isso é fácil de deixar passar
-
-**Correção realizada:** Uma constante única e a mesma comparação nos dois lugares.
-```js
-const LIMITE_ALTO_VALOR = 3000;
-
-const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
-```
-
-**Resultado após a correção:** Total de R$ 2.850,00 e "Pedido de alto valor"
+  const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
+  const descontoAltoValor = altoValor ? totalParcial * 0.05 : 0;
+  ```
+- **Resultado após a correção:** "Pedido de alto valor." com desconto de alto valor R$ 150,00 e total R$ 2.850,00.
 
 **Fluxograma:**
-```mermaid
-flowchart TD
-    A[/notebook, qtd = 1, retirada/] --> B["subtotal = 3000; desconto = 0; frete = 0"]
-    B --> C["total = 3000"]
-    C --> D{"total > 3000? (3000 > 3000)"}
-    D -- "Falso (sem 5% extra)" --> E{"total <= 0?"}
-    E -- Falso --> F{"total >= 3000? (3000 >= 3000)"}
-    F -- "Verdadeiro" --> G["mensagem = Alto valor"]
-    G --> H["Exibe: Alto valor, total R$ 3.000,00 (decisões inconsistentes)"]
+
+```
+ ( INÍCIO )
+     |
+     v
+ /Notebook, qtd = 1, retirada/
+     |
+     v
+ [subtotal = 3000, frete = 0]
+ [total = 3000]
+     |
+     v
+ < total > 3000 ? >
+   3000 > 3000 = FALSO   <-- ERRO: não aplica os 5% extras
+     |
+     v
+ < total >= 3000 ? >
+   3000 >= 3000 = VERDADEIRO   <-- mas aqui diz que é alto valor
+     |
+     v
+ /Alto valor, total R$ 3.000,00 (sem os 5%)/
+     |
+     v
+ ( FIM )
 ```
 
 ---
 
 ### ERRO 6
 
-**Nível:** Difícil
+- **Nível:** Difícil (análise de caminhos e rastreamento de variáveis)
+- **Trecho do código:**
+  ```js
+  if (total > 3000) {
+    total = total * 0.95;
+  }
 
-**Técnica usada:** Análise de caminhos e rastreamento de variáveis
+  if (total <= 0) {
+    mensagem = "Valor do pedido inválido.";
+  } else if (total >= 3000) {
+    mensagem = "Pedido de alto valor.";
+  }
+  ```
+- **Comportamento esperado:** a classificação de alto valor deve olhar o valor do pedido antes do desconto extra.
+- **Dados utilizados no teste:** Notebook, quantidade 1, sem cupom, frete expresso (R$ 60).
+- **Caminho percorrido:** subtotal 3000, desconto 0, frete 60, total 3060. D8 falso. D9 verdadeiro (`3060 > 3000`), total = 3060 × 0,95 = 2907. D10 falso. D11 falso (`2907 >= 3000`), mensagem fica "Sucesso".
+- **Resultado esperado:** "Pedido de alto valor." com total de R$ 2.907,00.
+- **Resultado obtido:** "Pedido calculado com sucesso." com total de R$ 2.907,00.
+- **Erro identificado:** ordem das operações. D9 reduz o `total` e logo depois D11 usa a mesma variável para classificar o pedido. Uma decisão altera o dado que a próxima vai ler. Todo pedido entre R$ 3.000,00 e cerca de R$ 3.157,89 recebe o desconto, cai abaixo de 3000 e perde a classificação.
+- **Correção realizada:**
+  ```js
+  const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
+  const descontoAltoValor = altoValor ? totalParcial * 0.05 : 0;
+  const total = totalParcial - descontoAltoValor;
 
-**Trecho do código:**
-```js
-if (total > 3000) {
-  total = total * 0.95;
-}
-
-if (total <= 0) {
-  mensagem = "Valor do pedido inválido.";
-} else if (total >= 3000) {
-  mensagem = "Pedido de alto valor.";
-}
-```
-
-**Comportamento esperado:** a classificação de alto valor deve olhar o valor do pedido antes do desconto extra.
-
-**Dados do teste:** Notebook, quantidade 1, sem cupom, frete expresso (R$ 60)
-
-**Caminho percorrido:** O subtotal é 3000 e o desconto é 0. Em D4 o frete expresso vale 60, então o total é 3060. D8 é falso. Em D9, `3060 > 3000` é verdadeiro e o total vira 3060 × 0,95 = 2907. Em D10, o resultado é falso. Em D11, `2907 >= 3000` é falso, e a mensagem fica como "sucesso"
-
-**Resultado esperado:** "Pedido de alto valor." com total de R$ 2.907,00
-
-**Resultado obtido:** "Pedido calculado com sucesso." com total de R$ 2.907,00
-
-**Erro identificado:** Ordem das operações. O desconto extra reduz `total` e, logo depois, a mesma variável é usada para classificar o pedido. Qualquer pedido entre R$ 3.000,00 e cerca de R$ 3.157,89 recebe o desconto, fica abaixo de 3000 e perde a classificação. Uma decisão altera os dados que a próxima decisão vai utilizar.
-
-**Correção realizada:** Decidir se o valor é alto, antes de mexer no total e usar essa regra na mensagem
-```js
-const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
-const descontoAltoValor = altoValor ? totalParcial * 0.05 : 0;
-const total = totalParcial - descontoAltoValor;
-
-if (total <= 0) {
-  mensagem = "Valor do pedido inválido.";
-} else if (altoValor) {
-  mensagem = "Pedido de alto valor.";
-}
-```
-
-**Resultado após a correção:** "Pedido de alto valor." e total de R$ 2.907,00
+  if (total <= 0) {
+    mensagem = "Valor do pedido inválido.";
+  } else if (altoValor) {
+    mensagem = "Pedido de alto valor.";
+  }
+  ```
+- **Resultado após a correção:** "Pedido de alto valor." com desconto de alto valor R$ 153,00 e total R$ 2.907,00.
 
 **Fluxograma:**
-```mermaid
-flowchart TD
-    A[/notebook, qtd = 1, expresso/] --> B["subtotal = 3000; desconto = 0"]
-    B --> C["frete = 60"]
-    C --> D["total = 3060"]
-    D --> E{"total > 3000? (3060 > 3000)"}
-    E -- Sim --> F["total = 3060 × 0,95 = 2907"]
-    F --> G{"total <= 0?"}
-    G -- Falso --> H{"total >= 3000? (2907 >= 3000)"}
-    H -- "Falso (erro: deveria ser alto valor)" --> I["mensagem = Sucesso"]
-    I --> J["Exibe: Sucesso, total R$ 2.907,00"]
+
+```
+ ( INÍCIO )
+     |
+     v
+ /Notebook, qtd = 1, expresso/
+     |
+     v
+ [subtotal = 3000, frete = 60]
+ [total = 3000 - 0 + 60 = 3060]
+     |
+     v
+ < total > 3000 ? >
+   3060 > 3000 = VERDADEIRO
+     |
+     v
+ [total = 3060 x 0,95 = 2907]   <-- o total muda aqui
+     |
+     v
+ < total >= 3000 ? >
+   2907 >= 3000 = FALSO   <-- ERRO: usa o total já reduzido
+     |
+     v
+ /Sucesso, total R$ 2.907,00/
+     |
+     v
+ ( FIM )
 ```
 
 ---
 
-### Comparação antes e depois
+### Comparação entre o comportamento anterior e o posterior
 
 | Erro | Nível | Antes | Depois |
 |---|---|---|---|
-| 1 | Fácil | Aceita a quantidade 0 e cobra frete | Recusa a quantidade 0, vazio e decimais |
+| 1 | Fácil | Aceita quantidade 0, vazia ou decimal e cobra frete | Recusa 0, vazio e decimais |
 | 2 | Fácil | Bloqueia o pedido igual ao estoque | Aceita até o estoque e bloqueia acima |
 | 3 | Médio | 5 unidades sem desconto | Desconto a partir de 5 unidades |
-| 4 | Médio | Desconto mostrado não concorda com o total | Desconto mostrado soma cupom e quantidade |
+| 4 | Médio | Desconto mostrado não fecha com o total | Desconto mostrado soma cupom e quantidade |
 | 5 | Difícil | `>` e `>=` divergem em 3000 | Mesmo limite nas duas decisões |
-| 6 | Difícil | Perde "alto valor" depois do desconto | Classificação decidida antes do desconto |
+| 6 | Difícil | Perde "alto valor" depois do desconto | Classificação feita antes do desconto |
 
 ### Cobertura
 
-Os seis casos passam por D1, D6, D7, D8, D9, D10 (lado falso), D11 (os dois lados) e parte da condição composta D2. Para cobrir tudo, ainda vale testar o cupom SENAI20 com subtotal acima e abaixo de R$ 1.000, o frete normal acima e abaixo de R$ 500 e sem um cupom.
+- Todas as decisões (D1 a D11) foram executadas pelos dois lados, exceto D10 verdadeiro (`total <= 0`). Depois da correção do Erro 1 ele não é alcançável pela interface, pois com quantidade ≥ 1 o subtotal é sempre positivo.
+- Valores-limite testados: 0 (Erro 1), 10 e 11 (Erro 2), 4 e 5 (Erro 3), 3000 e 3060 (Erros 5 e 6).
+- A condição composta do SENAI20 foi testada com subtotal acima e abaixo de R$ 1.000 (CT07 e CT08).
 
-### Código corrigido
+---
 
-O arquivo completo está em [`scriptarrumado.js`](./scriptarrumado.js). Esta é a função `finalizarPedido` depois das correções:
+## 7. Conclusão
+
+A atividade mostrou que um código pode rodar sem erros visíveis e mesmo assim calcular errado. Nenhuma das seis falhas travava o sistema, e elas só apareceram quando li cada decisão, testei os valores nos limites e acompanhei as variáveis passo a passo.
+
+Quatro erros eram de valor-limite (`<`, `>=`, `>` e `>` contra `>=`), um era de variável desatualizada (o desconto por quantidade que não entrava em `desconto`) e um era de ordem das operações (uma decisão alterando o dado que a seguinte lê). Os dois últimos são difíceis de achar só olhando entrada e saída, e os fluxogramas ajudaram a ver onde o caminho real saía do esperado.
+
+Depois das correções, os dez casos de teste passaram e o resultado correspondeu ao comportamento esperado. Isso mostra a importância do teste de caixa branca: ele permite escolher os testes a partir dos caminhos do código.
+
+---
+
+## Anexo – Código corrigido
+
+O arquivo completo é o [`scriptarrumado.js`](./scriptarrumado.js). A função `finalizarPedido` depois das seis correções:
 
 ```js
 const LIMITE_ALTO_VALOR = 3000;
@@ -479,11 +524,13 @@ function finalizarPedido() {
   const qtd = Number(quantidade.value);
   const codigo = cupom.value.trim().toUpperCase();
 
+  // ERRO 1
   if (!Number.isInteger(qtd) || qtd <= 0) {
     resultado.innerHTML = "<p>Quantidade inválida.</p>";
     return;
   }
 
+  // ERRO 2
   if (qtd > estoque[produtoSelecionado]) {
     resultado.innerHTML = "<p>Quantidade indisponível em estoque.</p>";
     return;
@@ -492,6 +539,7 @@ function finalizarPedido() {
   const subtotal = precos[produtoSelecionado] * qtd;
   let desconto = calcularDesconto(subtotal, codigo);
 
+  // ERRO 3 e ERRO 4
   if (qtd >= QTD_MINIMA_DESCONTO) {
     desconto += subtotal * 0.05;
   }
@@ -499,6 +547,7 @@ function finalizarPedido() {
   const valorFrete = calcularFrete(frete.value, subtotal);
   const totalParcial = subtotal - desconto + valorFrete;
 
+  // ERRO 5 e ERRO 6
   const altoValor = totalParcial >= LIMITE_ALTO_VALOR;
   const descontoAltoValor = altoValor ? totalParcial * 0.05 : 0;
   const total = totalParcial - descontoAltoValor;
@@ -521,9 +570,3 @@ function finalizarPedido() {
   `;
 }
 ```
-
----
-
-## 7. Conclusão
-
-A atividade mostrou que um código pode rodar sem erros visíveis e ainda estar incorreto. As seis falhas existentes não travavam o sistema e só foram detectadas na análise, passo a passo. Quatro erros de valor-limite (`<`, `>`, `>=`), uma inconsistência no desconto e um erro na ordem das operações (identificado com o fluxograma). Com as correções, todos os seis testes passaram a ser aprovados conforme as regras.
